@@ -74,13 +74,14 @@ local runTest = function(renderTarget, shape, alpha)
     end
 
     local expected = love.image.newImageData(
-                         string.format("expected-%s.png", testName));
+                         string.format("expected/expected-%s.png", testName));
     local identical, badPixel = diff(actual, expected);
     success = success and identical and not badPixel;
     print("\nTest case: " .. testName)
     print("\tidentical: ", identical);
 
-    save(actual, string.format("expected-%s.png", testName));
+    save(actual, string.format("actual-%s.png", testName));
+
     if badPixel then
         print(string.format(
                   "\tPixel at (x: %d, y: %d) is (R: %f, G: %f, B: %f, A: %g) but should be (R: %f, G: %f, B: %f, A: %f)",
