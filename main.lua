@@ -46,7 +46,7 @@ end
 local draw = function(fill, line)
     love.graphics.clear(love.graphics.getBackgroundColor());
     if fill then
-        love.graphics.setColor({0 / 255, 234 / 255, 255 / 255, 0.6});
+        love.graphics.setColor({0 / 255, 234 / 255, 255 / 255});
         love.graphics.circle("fill", 40, 40, 10, 16);
     end
     if line then
