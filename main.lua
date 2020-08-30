@@ -9,7 +9,7 @@ local diff = function(actual, expected)
                     local expectedColor = {expected:getPixel(x, y)};
                     local actualColor = {actual:getPixel(x, y)};
                     for i = 1, 4 do
-                        if math.abs(expectedColor[i] - actualColor[i]) > 1 / 255 then
+                        if math.abs(expectedColor[i] - actualColor[i]) * 255 > 1 then
                             badPixel = {
                                 x = x,
                                 y = y,
