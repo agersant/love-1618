@@ -1,3 +1,5 @@
+_G.love = love or {};
+
 local diff = function(actual, expected)
     local sameWidth = expected:getWidth() == actual:getWidth();
     local sameHeight = expected:getHeight() == actual:getHeight();
