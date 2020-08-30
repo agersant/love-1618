@@ -38,42 +38,50 @@ local capture = function()
 end
 
 local save = function(image, name)
-    local file = io.open(name .. ".png", "wb+");
+    local file = io.open(name, "wb+");
     file:write(image:encode("png"):getString());
     file:close();
 end
 
-local draw = function()
+local draw = function(fill, line)
     love.graphics.clear(love.graphics.getBackgroundColor());
-    love.graphics.setColor({0 / 255, 234 / 255, 255 / 255, 0.6});
-    love.graphics.circle("fill", 40, 40, 10, 16);
-    love.graphics.setColor({0 / 255, 234 / 255, 255 / 255});
-    love.graphics.circle("line", 40, 40, 10, 16);
+    if fill then
+        love.graphics.setColor({0 / 255, 234 / 255, 255 / 255, 0.6});
+        love.graphics.circle("fill", 40, 40, 10, 16);
+    end
+    if line then
+        love.graphics.setColor({0 / 255, 234 / 255, 255 / 255});
+        love.graphics.circle("line", 40, 40, 10, 16);
+    end
 end
 
 local success = true;
-local test = function(target)
+local runTest = function(renderTarget, fill, line)
     local actual;
-    if target == "canvas" then
+    if renderTarget == "canvas" then
         local canvas = love.graphics.newCanvas(love.graphics.getPixelWidth(),
                                                love.graphics.getPixelHeight());
         love.graphics.setCanvas(canvas);
-        draw();
+        draw(fill, line);
         love.graphics.setCanvas();
         actual = canvas:newImageData();
-    elseif target == "backbuffer" then
-        draw();
+    elseif renderTarget == "backbuffer" then
+        draw(fill, line);
         actual = capture();
     end
 
+    local imageSuffix = renderTarget;
+    if fill then imageSuffix = string.format("%s-%s", imageSuffix, "fill"); end
+    if line then imageSuffix = string.format("%s-%s", imageSuffix, "line"); end
+
     local expected = love.image.newImageData(
-                         string.format("expected-%s.png", target));
+                         string.format("expected-%s.png", imageSuffix));
     local identical, badPixel = diff(actual, expected);
     success = success and identical and not badPixel;
-    print("\nTest case: " .. target)
+    print("\nTest case: " .. renderTarget)
     print("\tidentical: ", identical);
 
-    save(actual, string.format("actual-%s.png", target));
+    save(actual, string.format("actual-%s.png", imageSuffix));
 
     if badPixel then
         print(string.format(
@@ -85,7 +93,13 @@ local test = function(target)
     end
 end
 
-test("backbuffer");
-test("canvas");
+for _, renderTarget in ipairs({"canvas", "backbuffer"}) do
+    for _, fill in ipairs({true, false}) do
+        for _, line in ipairs({true, false}) do
+            if fill or line then runTest(renderTarget, fill, line); end
+        end
+    end
+end
+
 love.event.quit(success and 0 or 1);
 
