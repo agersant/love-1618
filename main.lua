@@ -78,7 +78,7 @@ local runTest = function(renderTarget, fill, line)
                          string.format("expected-%s.png", imageSuffix));
     local identical, badPixel = diff(actual, expected);
     success = success and identical and not badPixel;
-    print("\nTest case: " .. renderTarget)
+    print("\nTest case: " .. imageSuffix)
     print("\tidentical: ", identical);
 
     save(actual, string.format("actual-%s.png", imageSuffix));
