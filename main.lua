@@ -42,25 +42,48 @@ local save = function(image, name)
 end
 
 local draw = function()
+    love.graphics.clear(love.graphics.getBackgroundColor());
     love.graphics.setColor({0 / 255, 234 / 255, 255 / 255, 0.6});
     love.graphics.circle("fill", 40, 40, 10, 16);
     love.graphics.setColor({0 / 255, 234 / 255, 255 / 255});
     love.graphics.circle("line", 40, 40, 10, 16);
 end
 
-draw();
-local actual = capture();
-local expected = love.image.newImageData("expected.png");
-save(actual, "actual");
-local identical, badPixel = diff(actual, expected);
-print("identical", identical);
-if badPixel then
-    print(string.format(
-              "Pixel at (x: %d, y: %d) is (R: %f, G: %f, B: %f, A: %g) but should be (R: %f, G: %f, B: %f, A: %f)",
-              badPixel.x, badPixel.y, badPixel.actual[1], badPixel.actual[2],
-              badPixel.actual[3], badPixel.actual[4], badPixel.expected[1],
-              badPixel.expected[2], badPixel.expected[3], badPixel.expected[4]));
+local success = true;
+local test = function(target)
+    local actual;
+    if target == "canvas" then
+        local canvas = love.graphics.newCanvas(love.graphics.getPixelWidth(),
+                                               love.graphics.getPixelHeight());
+        love.graphics.setCanvas(canvas);
+        draw();
+        love.graphics.setCanvas();
+        actual = canvas:newImageData();
+    elseif target == "backbuffer" then
+        draw();
+        actual = capture();
+    end
+
+    local expected = love.image.newImageData(
+                         string.format("expected-%s.png", target));
+    local identical, badPixel = diff(actual, expected);
+    success = success and identical and not badPixel;
+    print("\nTest case: " .. target)
+    print("\tidentical: ", identical);
+
+    save(actual, string.format("actual-%s.png", target));
+
+    if badPixel then
+        print(string.format(
+                  "\tPixel at (x: %d, y: %d) is (R: %f, G: %f, B: %f, A: %g) but should be (R: %f, G: %f, B: %f, A: %f)",
+                  badPixel.x, badPixel.y, badPixel.actual[1],
+                  badPixel.actual[2], badPixel.actual[3], badPixel.actual[4],
+                  badPixel.expected[1], badPixel.expected[2],
+                  badPixel.expected[3], badPixel.expected[4]));
+    end
 end
 
-love.event.quit(identical and 0 or 1);
+test("backbuffer");
+test("canvas");
+love.event.quit(success and 0 or 1);
 
