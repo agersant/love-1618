@@ -21,4 +21,4 @@ jobs:
       if: failure()
       with:
         name: test-output
-        path: *.png
+        path: "*.png"
