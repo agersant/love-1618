@@ -52,6 +52,8 @@ local draw = function(shape, alpha)
         love.graphics.circle("line", 40, 40, 10, 16);
     elseif shape == "square" then
         love.graphics.rectangle("fill", 30, 30, 20, 20);
+    elseif shape == "square-line" then
+        love.graphics.rectangle("line", 30, 30, 20, 20);
     end
 end
 
@@ -95,7 +97,7 @@ end
 local numAlphaSteps = 5;
 for _, renderTarget in ipairs({"canvas", "backbuffer"}) do
     for alpha = 1, numAlphaSteps do
-        for _, shape in ipairs({"disk", "circle", "square"}) do
+        for _, shape in ipairs({"disk", "circle", "square", "square-line"}) do
             runTest(renderTarget, shape, alpha / numAlphaSteps);
         end
     end
