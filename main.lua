@@ -43,9 +43,10 @@ local save = function(image, name)
     file:close();
 end
 
-local draw = function(shape, alpha)
+local draw = function(shape, lineStyle, alpha)
     love.graphics.clear(love.graphics.getBackgroundColor());
     love.graphics.setColor({0 / 255, 234 / 255, 255 / 255, alpha});
+    love.graphics.setLineStyle(lineStyle);
     if shape == "disk" then
         love.graphics.circle("fill", 40, 40, 10, 16);
     elseif shape == "circle" then
@@ -58,25 +59,27 @@ local draw = function(shape, alpha)
 end
 
 local success = true;
-local runTest = function(renderTarget, shape, alpha)
+local runTest = function(renderTarget, shape, lineStyle, alpha)
 
-    local testName = string.format("%s-%s-%.2f", renderTarget, shape, alpha);
+    local testName = string.format("%s-%s-%s-%.2f", renderTarget, shape,
+                                   lineStyle, alpha);
 
     local actual;
     if renderTarget == "canvas" then
         local canvas = love.graphics.newCanvas(love.graphics.getPixelWidth(),
                                                love.graphics.getPixelHeight());
         love.graphics.setCanvas(canvas);
-        draw(shape, alpha);
+        draw(shape, lineStyle, alpha);
         love.graphics.setCanvas();
         actual = canvas:newImageData();
     elseif renderTarget == "backbuffer" then
-        draw(shape, alpha);
+        draw(shape, lineStyle, alpha);
         actual = capture();
     end
 
-    local expected = love.image.newImageData(
-                         string.format("expected/expected-%s.png", testName));
+    local expected = love.image.newImageData(string.format(
+                                                 "expected/expected-%s.png",
+                                                 testName));
     local identical, badPixel = diff(actual, expected);
     success = success and identical and not badPixel;
     print("\nTest case: " .. testName)
@@ -96,9 +99,11 @@ end
 
 local numAlphaSteps = 5;
 for _, renderTarget in ipairs({"canvas", "backbuffer"}) do
-    for alpha = 1, numAlphaSteps do
-        for _, shape in ipairs({"disk", "circle", "square", "square-line"}) do
-            runTest(renderTarget, shape, alpha / numAlphaSteps);
+    for _, shape in ipairs({"disk", "circle", "square", "square-line"}) do
+        for _, lineStyle in ipairs({"smooth", "rough"}) do
+            for alpha = 1, numAlphaSteps do
+                runTest(renderTarget, shape, lineStyle, alpha / numAlphaSteps);
+            end
         end
     end
 end
